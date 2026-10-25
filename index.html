@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HLF 20 Beladeliste – Quiz</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#fff;--fg:#1a1a1a;--card:#f3f3f3;--bd:#d0d0d0;--red:#c8102e;--ok:#1b8a3a;--okbg:#d9f2e0;--no:#c8102e;--nobg:#fbdcdf;color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111;--fg:#eee;--card:#222;--bd:#444;--okbg:#14391f;--nobg:#4a1920;--ok:#5fd37f;--no:#ff7a8a}}
+:root[data-theme="dark"]{--bg:#111;--fg:#eee;--card:#222;--bd:#444;--okbg:#14391f;--nobg:#4a1920;--ok:#5fd37f;--no:#ff7a8a}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{background:var(--red);color:#fff;padding:12px 16px;font-weight:700;font-size:18px}
+main{max-width:560px;margin:0 auto;padding:14px}
+.row{display:flex;gap:8px;margin-bottom:10px}
+select{flex:1;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--fg);font-size:15px;min-width:0}
+.stat{display:flex;justify-content:space-between;font-size:14px;opacity:.8;margin:6px 2px 12px}
+.q{font-size:20px;font-weight:600;margin:6px 0 14px}
+.tag{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--red);font-weight:700}
+button.o{display:block;width:100%;text-align:left;padding:14px;margin:0 0 9px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--fg);font-size:16px}
+button.o.ok{background:var(--okbg);border-color:var(--ok)}
+button.o.no{background:var(--nobg);border-color:var(--no)}
+button.n{width:100%;padding:14px;border:0;border-radius:12px;background:var(--red);color:#fff;font-size:16px;font-weight:600;margin-top:4px}
+.fb{margin:8px 2px;font-size:15px;min-height:22px}
+</style></head><body>
+<header>🚒 HLF 20 – Beladeliste Quiz</header>
+<main>
+<div class="row"><select id="mode"><option value="m">Gemischt</option><option value="wo">Wo liegt …?</option><option value="was">Was liegt in …?</option></select>
+<select id="fach"></select></div>
+<div class="stat"><span id="sc">Richtig: 0 / 0</span><span id="st">Serie: 0</span></div>
+<div class="tag" id="tag"></div><div class="q" id="q"></div>
+<div id="opts"></div><div class="fb" id="fb"></div>
+<button class="n" id="nx" style="display:none">Weiter</button>
+</main>
+<script>
+const D={
+"Mannschaftsraum vorne":["WBK","Handsprechfunkgerät","Knickkopflampe","Wagenheber","PA","Maske","Leinenbeutel","Warnweste"],
+"Mannschaftsraum hinten":["Infektionshandschuhe","PA","Leinenbeutel","Defi","Notfallrucksack","Wolldecke","Kühlbox"],
+"G1 + Schwenkwand außen":["Bolzenschneider","FW-Axt","Schachthaken","Schachtdeckelheber","Holzaxt","Unterflurhydrantenschlüssel","Überflurhydrantenschlüssel","Kappenhammer","Standrohr","Systemtrenner","Akku-Spreizgerät","Akku-Teleskopzylinder (lang)","Sichtschutz","Rettungsplattform","Bereitstellungsplane","Patientenschutz","Stab-Pack Unterbaumaterial"],
+"G1 + Schwenkwand innen":["Stab-Fast","Forsthelm","Schnittschutzkleidung","Ladesimulationsstecker","Kennzeichnung Hochvolt","Radkeile / Spanngurte","Kombikanister","Akku-Scheinwerfer","Rettungssäge","Motorsäge","Ersatzkette / Zubehör Motorsäge","Spaltkeil","Akku-Schneidgerät","Akku-Rettungszylinder (kurz)","Load-Pad","Spreizerkette / Türöffnungsspitzen","Zubehör Spineboard","Spineboard","Mulden / Ölvlies","Druckluft Schlauchaufroller","Sichtschutz","Akku Ladegerät / Wechselakkus","Streusalzkanister","Airbagsicherung (Beifahrer)","Airbagsicherung (Fahrer)","20l Kanister (leer)","Umfüllpumpe","Box Akkuwerkzeug 1 (Winkelschleifer, Metallkreissäge)","Box Akkuwerkzeug 2 (Schlagbohrmaschine, Säbelsäge)","Rüstholz","Bereitstellungsplane","Patientenschutz","Stab-Pack Unterbaumaterial","Rettungsplattform","Netzstecker f. Akku-Rettungsgeräte","Anklebe-Folie Autoscheibe"],
+"G1 Schwenkwand Stirnseite":["Stab-Fast","Zubehörtool Stabfast","Akku-Spreizgerät","Akku-Schneidgerät","Akku-Rettungszylinder (lang)","Akku-Rettungszylinder (kurz)","Schwelleraufsatz + Druckplatten"],
+"G2 + Schwenkwand außen":["Rundschlinge 10t 5m","Rundschlinge 10t 3m","Einstrangkettengehänge","8x Schäkel","Tauchpumpe + 90° Bogen","2x Stoßbesen","Randschaufel Alu","Zubehör Hebekissen (in Tragewanne)","Absperrband","2x Anhaltestab","3x Hebekissen","Stromerzeuger m. Gebäudeeinspeisung","Betankungssystem f. Stromerzeuger","2x 5m Luftschläuche"],
+"G2 + Schwenkwand innen":["Abschleppseil, Kantenreiter, Rundöse","Laubbläser","Infrarotstrahler","Kantenschutz","Windenkeile","Teleskopleiter","Atemschutzgerät","Gewichtsdecke","Chokerseil","Leitungsroller","20l Kanister + Einfüllstutzen","Abgasschlauch","2x Personenschutzschalter","Scheinwerfer","Akkulüfter","Ölbindemittel","Elektrowerkzeug","Stativ","Abspannvorrichtung f. Stativ"],
+"G3":["KFZ-Öffnungsset","Löschdecke - PKW-Brand","Wasserwerfer + Schaumaufsatz","Zubehör Wasserwerfer","Atemschutznotfalltasche","Sperrwerkzeug","Verkehrsunfallkasten","Handwerkzeugkasten","Schlauchbrücken"],
+"G4":["Box: Schutzbrillen, Gehörschutz, FFP2-Maske","Box: Gummistiefel, CSA-Handschuhe","Box: Rettungsweste, Wurfleine, AbStuSi Helm + Seilhandschuhe","Sprungpolster SP 16","EcoTarp Wanne","Schachtabdeckung","Form 2 - Chemieschutzanzug / Einwegoverall","Wechseloverall + Kleidersack f. Einsatzkleidung","Schlauchbrücken"],
+"G5":["Hohlstrahlrohr C","Hohlstrahlrohr B + Stützkrümmer","Schlauchspirale + Hohlstrahlrohr C","Halligan-Tool + FireAxe","Rauchschutzvorhang","Führungsleine","Schaumaufsatz f. Hohlstrahlrohr B","Schlauchtragekorb 3xC + Absperrorgan","20m B-Schlauch","BB-CBC Verteiler + B-Schlauch","Übergangsstück BC + CD"],
+"G6":["GS-Absturzsicherung","Box (Reinigungstücher, pH-Streifen, Ölnachweispapier)","Hygieneboard","B-Kupplung mit Wasserhahn","Gardenaschlauch","Waschbürste","C-Ansaugschlauch (Formstabil)","MicroCAFS","CO² Löscher","2x Pulverlöscher","Schnellangriffschlauch (30m C im Schlauchpaket)","Hohlstrahlrohr C (inkl. Schiebeaufsatz Schaum)","Übergangsstück BC","20m B-Schlauch","BB-CBC Verteiler + B-Schlauch","FW Mehrzweckhund"],
+"GR (Geräteraum Pumpe)":["Saugschutzkorb","Saugkorb","Sammelstück A-BBB","4x Mehrzweckleine","Kupplungsschlüssel"],
+"Haspel – Schlauch":["8x B-Schlauch","Standrohr + Hygieneverschluss","Unterflurhydrantenschlüssel","Überflurhydrantenschlüssel","Kappenhammer","Kupplungsschlüssel","Systemtrenner","Warneinrichtung Rollo + Warnlicht","Kurbel f. Haspel"],
+"Haspel – Verkehrsabsicherung":["10x Verkehrsleitkegel","3x Faltdreieck","6x Warnleuchten EuroBlitz","Warneinrichtung Rollo + Warnlicht"],
+"Dach":["3-tlg. Schiebleiter","4x Saugschlauch","Kiste Vegetationsbrandbekämpfung (Druckschlauch D, HSR D, C-DCD Verteiler, Löschrucksack)","4-tlg. Steckleiter + Einsteckteil"],
+"Dach – seitliche Ablage":["Einreisshaken (teleskopierbar)","Steckleiterverbindungsteil","Ölbindemittel","Bindestrick","Abgasschlauch","Sandschaufel","Stechschaufel","Dunggabeln","Dunghaken","Spaten","Gorgui Tool","Formstabiler Schlauch f. Tauchpumpe"]};
+const AL={"Standrohr + Hygieneverschluss":"Standrohr","Hohlstrahlrohr C (inkl. Schiebeaufsatz Schaum)":"Hohlstrahlrohr C","Übergangsstück BC + CD":"Übergangsstück BC","Atemschutzgerät":"PA","Akku-Scheinwerfer":"Scheinwerfer"};
+const c=i=>AL[i]||i;
+const rel=(a,b)=>a.includes(b)||b.includes(a);
+const K=Object.keys(D),N={};
+K.forEach(k=>D[k].forEach(i=>{const x=c(i);N[x]=N[x]||[];if(!N[x].includes(k))N[x].push(k)}));
+const ALL=Object.keys(N);
+const $=id=>document.getElementById(id);
+let ok=0,n=0,streak=0,cur=null;
+$("fach").innerHTML='<option value="">Alle Fächer</option>'+K.map(k=>`<option>${k}</option>`).join("");
+const r=a=>a[Math.floor(Math.random()*a.length)];
+const sh=a=>a.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+function next(){
+ $("fb").textContent="";$("nx").style.display="none";
+ let m=$("mode").value;if(m==="m")m=Math.random()<.5?"wo":"was";
+ const f=$("fach").value;let opts,correct,txt,tag;
+ if(m==="wo"){
+  const pool=f?D[f].map(c):ALL;const it=r(pool);const locs=N[it];
+  const wrong=sh(K.filter(k=>!D[k].some(x=>rel(c(x),it)))).slice(0,3);
+  const cc=f&&locs.includes(f)?f:r(locs);
+  opts=sh([cc,...wrong]);cur={m,ok:locs,it};tag="Wo liegt …?";txt=it;
+ }else{
+  const k=f||r(K);const cc=c(r(D[k]));
+  const wrong=sh(ALL.filter(i=>!D[k].some(x=>rel(c(x),i)))).slice(0,3);
+  opts=sh([cc,...wrong]);cur={m,ok:D[k].map(c),k};tag="Was liegt in …?";txt=k+"?";
+ }
+ $("tag").textContent=tag;$("q").textContent=txt;
+ $("opts").innerHTML="";
+ opts.forEach(o=>{const b=document.createElement("button");b.className="o";b.textContent=o;b.onclick=()=>pick(b,o);$("opts").appendChild(b)});
+}
+function pick(b,o){
+ if(cur.done)return;cur.done=1;n++;
+ const good=cur.ok.includes(o);
+ if(good){ok++;streak++;b.classList.add("ok");$("fb").textContent="✅ Richtig!"}
+ else{streak=0;b.classList.add("no");
+  [...$("opts").children].forEach(x=>{if(cur.ok.includes(x.textContent))x.classList.add("ok")});
+  $("fb").textContent="❌ "+(cur.m==="wo"?"Liegt in: "+cur.ok.join(" / "):"Gehört zu: "+cur.k)}
+ if(cur.m==="wo"&&good&&cur.ok.length>1)$("fb").textContent+=" (auch in: "+cur.ok.filter(x=>x!==o).join(" / ")+")";
+ $("sc").textContent=`Richtig: ${ok} / ${n}`;$("st").textContent="Serie: "+streak;
+ $("nx").style.display="block";
+}
+$("nx").onclick=next;$("mode").onchange=next;$("fach").onchange=next;
+next();
+</script></body></html>
